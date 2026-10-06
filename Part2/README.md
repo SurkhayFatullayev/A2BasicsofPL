@@ -57,6 +57,7 @@ lst_1 = [1, 2, 3, 4, 5, 6]
 print("New list with 6 values size:", lst_1.__sizeof__())
 ```
 We assume that lst and lst_1 may have same size since amount of ekements is same yet due to way python allocates space to lists they have different sizes
+
 ![weird memory](./img/part2_3.png)
 
 this happend since when you append to a list, memory is over-allocated to the list for performance reasons so that multiple appends would not require corresponding reallocations of memory for the list which would slow the overall performance in the case of repeated appends
