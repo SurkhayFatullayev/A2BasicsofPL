@@ -1,4 +1,4 @@
-# Part 2: Matrix Multiplication 
+# Part 3: Matrix Multiplication 
 
 ## Implementation in Python
 
