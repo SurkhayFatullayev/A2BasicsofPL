@@ -1,0 +1,16 @@
+# Java compiled files and build output
+*.class
+out/
+target/
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE and operating-system files
+.DS_Store
+.idea/
+*.iml
+.vscode/
