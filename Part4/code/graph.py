@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -5,49 +6,29 @@ import numpy as np
 
 
 def load_matrices(path):
-    """Load matrix values and ignore section names."""
-    matrices = []
-    current_matrix = []
-
+    """Load named matrices from a JSON file."""
     with open(path) as file:
-        for line in file:
-            line = line.strip()
-
-            if not line:
-                continue
-
-            is_header = line.startswith("#") or line.startswith("Original")
-            if is_header:
-                if current_matrix:
-                    matrices.append(np.array(current_matrix))
-                    current_matrix = []
-                continue
-
-            current_matrix.append(
-                [float(value) for value in line.replace(",", " ").split()]
-            )
-
-    if current_matrix:
-        matrices.append(np.array(current_matrix))
-
-    return matrices
+        data = json.load(file)
+    return {
+        name: np.array(matrix, dtype=float)
+        for name, matrix in data.items()
+    }
 
 
 output_directory = Path(__file__).parent / "text"
-java_matrices = load_matrices(output_directory / "java_out.txt")
-numpy_matrices = load_matrices(output_directory / "numpy_out.txt")
+java_matrices = load_matrices(output_directory / "java_out.json")
+numpy_matrices = load_matrices(output_directory / "numpy_out.json")
 
-if len(java_matrices) != len(numpy_matrices):
-    raise ValueError("The files contain a different number of matrices.")
+if java_matrices.keys() != numpy_matrices.keys():
+    raise ValueError("The JSON files contain different matrix names.")
 
-for index, (java_matrix, numpy_matrix) in enumerate(
-    zip(java_matrices, numpy_matrices),
-    start=1,
-):
+for name in numpy_matrices:
+    java_matrix = java_matrices[name]
+    numpy_matrix = numpy_matrices[name]
     if java_matrix.shape != numpy_matrix.shape:
-        raise ValueError(f"Matrix {index} has different shapes.")
+        raise ValueError(f"Matrix {name} has different shapes.")
     if not np.allclose(java_matrix, numpy_matrix):
-        raise ValueError(f"Matrix {index} contains different values.")
+        raise ValueError(f"Matrix {name} contains different values.")
 
 fig, axes = plt.subplots(
     len(numpy_matrices),
@@ -57,9 +38,9 @@ fig, axes = plt.subplots(
 )
 fig.suptitle("Java and NumPy Matrix Values", fontsize=16)
 
-for row, (java_matrix, numpy_matrix) in enumerate(
-    zip(java_matrices, numpy_matrices)
-):
+for row, name in enumerate(numpy_matrices):
+    java_matrix = java_matrices[name]
+    numpy_matrix = numpy_matrices[name]
     minimum = min(java_matrix.min(), numpy_matrix.min())
     maximum = max(java_matrix.max(), numpy_matrix.max())
 
@@ -68,7 +49,7 @@ for row, (java_matrix, numpy_matrix) in enumerate(
     ):
         axis = axes[row, column]
         image = axis.imshow(matrix, cmap="viridis", vmin=minimum, vmax=maximum)
-        axis.set_title(f"Matrix {row + 1} - {language}")
+        axis.set_title(f"{name} - {language}")
         axis.set_xlabel("Column")
         axis.set_ylabel("Row")
         axis.set_xticks(range(matrix.shape[1]))

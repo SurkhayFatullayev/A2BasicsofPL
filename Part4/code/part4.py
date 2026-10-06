@@ -1,5 +1,6 @@
+import json
+
 import numpy as np
-import os
 
 A = np.arange(1, 50).reshape(7, 7)
 
@@ -9,9 +10,12 @@ slices = {
     "A[::-1, ::-1]": A[::-1, ::-1],
 }
 
-with open("Part4/code/text/numpy_out.txt", "w") as f:
-    for name, m in slices.items():
-        f.write(f"# {name}\n")
-        for row in m:
-            f.write(",".join(map(str, row)) + "\n")
-print("Wrote numpy_out.txt")
+json_slices = {
+    name: matrix.tolist()
+    for name, matrix in slices.items()
+}
+
+with open("Part4/code/text/numpy_out.json", "w") as f:
+    json.dump(json_slices, f)
+
+print("Wrote numpy_out.json")
